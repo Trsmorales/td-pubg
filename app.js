@@ -8,8 +8,9 @@ var socketIO = require('socket.io');
 var http = require('http');
 var debug = require('debug')('td-pubgExpressApp:server');
 
-var users = require('./routes/users');
-var map = require('./routes/map');
+var login = require('./routes/login');
+var logout = require('./routes/logout');
+var secure = require('./routes/secure');
 
 var port = normalizePort(process.env.PORT || '3000');
 
@@ -26,11 +27,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(checkAuth);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname + '/public'));
 
-app.use('/user', users);
-app.use('/map', map);
+app.use('/login', login);
+app.use('/logout', logout);
+app.use('/secure', secure);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -112,4 +115,18 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+}
+
+function checkAuth (req, res, next) {
+	console.log('checkAuth ' + req.url);
+
+	// don't serve /secure to those not logged in
+	// you should add to this list, for each and every secure url
+	if (req.url === '/secure' && (!req.session || !req.session.authenticated)) {
+    console.log('un-authed');
+		res.send('unauthorised', { status: 403 });
+		return;
+	}
+
+	next();
 }
