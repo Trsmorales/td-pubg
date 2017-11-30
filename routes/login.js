@@ -21,10 +21,7 @@ router.post('/', function(req, res, next) {
 		}
 });
 
-router.post('/register', function(req, res, next) {
-     console.log(JSON.stringify(req.baseUrl));
-		console.log("post wen't through");
-});
+
 
 
 module.exports = router;
