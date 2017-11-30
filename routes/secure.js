@@ -4,7 +4,7 @@ var path = require('path');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.send('Woah you shouldnt be here');
+  res.send('HO SHIT HOW U GET HERE????');
 });
 
 module.exports = router;

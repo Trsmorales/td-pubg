@@ -26,14 +26,14 @@
 			</div>
 			<div class="container mx-auto" style="width: 400px;">
 				<div class="login">
-					<form class="text-dark">
+					<form class="text-dark" action="/login" method="post">
 					  <div class="form-group">
-						<label for="loginEmail">Email/Username</label>
-						<input type="email" class="form-control" id="loginEmail" aria-describedby="emailHelp" placeholder="Enter email or username">
+						<label for="username">Email/Username</label>
+						<input type="text" name="username" class="form-control" id="username" aria-describedby="emailHelp" placeholder="Enter email or username">
 					  </div>
 					  <div class="form-group">
-						<label for="loginPassword">Password</label>
-						<input type="password" class="form-control" id="loginPassword" placeholder="Password">
+						<label for="password">Password</label>
+						<input type="password" name="password" class="form-control" id="password" placeholder="Password">
 					  </div>
 					  <div class="form-check">
 						<label class="form-check-label">

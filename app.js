@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var socketIO = require('socket.io');
 var http = require('http');
 var debug = require('debug')('td-pubgExpressApp:server');
+var session = require('express-session')
 
 var login = require('./routes/login');
 var logout = require('./routes/logout');
@@ -27,6 +28,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({ secret: 'example' }));
 app.use(checkAuth);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname + '/public'));
