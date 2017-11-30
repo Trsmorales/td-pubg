@@ -16,6 +16,11 @@ var secure = require('./routes/secure');
 var port = normalizePort(process.env.PORT || '3000');
 
 var app = express();
+
+var options = {
+  index: 'login.html'
+};
+
 var server = http.createServer(app);
 
 server.listen(port);
@@ -30,8 +35,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({ secret: 'example' }));
 app.use(checkAuth);
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public', options));
 
 app.use('/login', login);
 app.use('/logout', logout);
