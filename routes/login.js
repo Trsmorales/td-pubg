@@ -7,8 +7,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/register', function(req, res, next) {
-    console.log("HI I AM HERE");
-    res.redirect('/login');
+      res.redirect('/login');
 });
 
 router.post('/', function(req, res, next) {
