@@ -14,11 +14,15 @@ body {
 .character {
 	position: absolute;
 	top: calc(50% - 25vh);
-	right: calc(50% - 20vh);
+	right: calc(50% - 25vh);
 	height: 50vh;
-	width: 40vh;
-	border-radius: 15px;
-	background-color: red;
+	width: 50vh;
+	border-radius: 25vh;
+	background-color: slateblue;
+	background-image: url(../images/avatar-01.svg);
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
 }
 .top-right-nav {
 	position: absolute;
