@@ -126,13 +126,13 @@ function onListening() {
 }
 
 function checkAuth (req, res, next) {
-	console.log('checkAuth ' + req.url);
+	console.log('checkAuth for ' + req.url);
 
 	// don't serve /secure to those not logged in
 	// you should add to this list, for each and every secure url
-	if (req.url === '/secure' && (!req.session || !req.session.authenticated)) {
-    console.log('un-authed');
-		res.send('unauthorised', { status: 403 });
+	if (req.url.startsWith("/secure") && (!req.session || !req.session.authenticated)) {
+    console.log('unauthorized');
+		res.send('unauthorized', { status: 403 });
 		return;
 	}
 
