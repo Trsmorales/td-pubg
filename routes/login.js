@@ -6,6 +6,10 @@ router.get('/', function(req, res, next) {
   res.sendFile(path.join(__dirname, '../public/', 'login.html'));
 });
 
+router.post('/register', function(req, res, next) {
+      res.redirect('/login');
+});
+
 router.post('/', function(req, res, next) {
      console.log(JSON.stringify(req.baseUrl));
   		// you might like to do a database look-up or something more scalable here
@@ -20,6 +24,8 @@ router.post('/', function(req, res, next) {
 			res.redirect('/login');
 		}
 });
+
+
 
 
 module.exports = router;
