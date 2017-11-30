@@ -7,4 +7,6 @@ router.get('/', function(req, res, next) {
   res.send('HO SHIT HOW U GET HERE????');
 });
 
+router.use(express.static(__dirname + '/public/secure'));
+
 module.exports = router;

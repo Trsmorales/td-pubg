@@ -14,7 +14,7 @@ router.post('/', function(req, res, next) {
     {
 			req.session.authenticated = true;
         console.log("Authenticated Redirecting to Secure");
-			res.redirect('/secure');
+			res.redirect('/secure/index.html');
 		} else {
 			//req.flash('error', 'Username and password are incorrect');
 			res.redirect('/login');

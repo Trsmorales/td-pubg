@@ -7,7 +7,8 @@ var bodyParser = require('body-parser');
 var socketIO = require('socket.io');
 var http = require('http');
 var debug = require('debug')('td-pubgExpressApp:server');
-var session = require('express-session')
+var session = require('express-session');
+var flash = require('express-flash');
 
 var login = require('./routes/login');
 var logout = require('./routes/logout');
@@ -36,6 +37,7 @@ app.use(cookieParser());
 app.use(session({ secret: 'example' }));
 app.use(checkAuth);
 app.use(express.static(__dirname + '/public', options));
+app.use(flash());
 
 app.use('/login', login);
 app.use('/logout', logout);
