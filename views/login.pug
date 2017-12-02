@@ -1,0 +1,105 @@
+doctype html
+head
+  meta(charset='utf-8')
+  |     
+  title Login Page
+  |     
+  meta(name='viewport', content='width=device-width, initial-scale=1, shirnk-to-fit=no')
+  |     
+  link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css', integrity='sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb', crossorigin='anonymous')
+  |     
+  link(rel='stylesheet', type='text/css', href='public/stylesheets/style.css')
+.container.mt-4
+  .container.text-center.text-dark
+    h1.display-3.font-weight-bold TOP DOWN PUB-G
+    |             
+    p.lead Coming Soon, a Turn Based Battle Royale Game.
+  |         
+  .container.pubg-form.mt-5.p-5.rounded(style='width: 500px;')
+    .container.text-center.mx-auto
+      .btn-group(data-toggle='buttons')
+        label.btn.btn-primary.active
+          input#option1.login-btn(type='radio', name='options', autocomplete='off', checked='')
+          |  Login
+        |                     
+        label.btn.btn-dark
+          input#option2.reg-btn(type='radio', name='options', autocomplete='off')
+          |  Register
+    |             
+    .container.mx-auto(style='width: 400px;')
+      .login
+        form.text-dark(action='/login', method='post')
+          .form-group
+            label(for='username') Email/Username
+            |                             
+            input#username.form-control(type='text', name='username', required='', aria-describedby='emailHelp', placeholder='Enter email or username')
+          |                         
+          .form-group
+            label(for='password') Password
+            |                             
+            input#password.form-control(type='password', name='password', required='', placeholder='Password')
+          |                         
+          .form-check
+            label.form-check-label
+              input.form-check-input(type='checkbox')
+              | &#x9;&#x9;&#x9;&#x9;&#x9;&#x9;  Remember Me
+          |                         
+          .text-center
+            button.btn.btn-primary.btn-block(type='submit') Submit
+      // Second Form
+      .register
+        form.text-dark(action='/login/register', method='post')
+          .form-group
+            label(for='username') Username
+            |                             
+            input#username.form-control(name='username', type='email', required='', aria-describedby='emailHelp', placeholder='Enter a username')
+          |                         
+          .form-group
+            label(for='password') Password
+            |                             
+            input#password1.form-control(name='password', type='password', required='', placeholder='Password')
+          |                         
+          .form-group
+            label(for='password') Confirm Password
+            |                             
+            input#password2.form-control(name='password', type='password', required='', placeholder='Password')
+          |                         
+          p#validate-status
+          |                         
+          .text-center.mt-4
+            button#submit-button.btn.btn-primary.btn-block(type='submit', disabled='') Register
+    |             
+    p#server-time
+|     
+script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js', integrity='sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin='anonymous')
+|     
+script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js', integrity='sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh', crossorigin='anonymous')
+|     
+script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js', integrity='sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ', crossorigin='anonymous')
+|     
+script(src='public/javascripts/scripts.js', type='text/javascript')
+|     
+script(src='/socket.io/socket.io.js')
+|     
+script.
+  var socket = io();
+  var el = document.getElementById('server-time');
+  socket.on('time', function(timeString) {
+  el.innerHTML = 'Server time: ' + timeString;
+  });
+  $(document).ready(function() {
+  $("#password2").keyup(validate);
+  $("#password1").keyup(validate);
+  });
+  function validate() {
+  var password1 = $("#password1").val();
+  var password2 = $("#password2").val();
+  console.log("here");
+  if ((password1 == password2) && (password1 != "")) {
+  $("#validate-status").text("Passwords Match!");
+  document.getElementById("submit-button").disabled = false;
+  } else {
+  $("#validate-status").text("Passwords Do Not Match!");
+  document.getElementById("submit-button").disabled = true;
+  }
+  }

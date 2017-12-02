@@ -3,10 +3,10 @@ var router = express.Router();
 var path = require('path');
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.send('HO SHIT HOW U GET HERE????');
+router.get('/*', function(req, res, next) {
+  console.log("In Secure, routing to: "+ req.url);
+  res.render(path.join(__dirname, '../secure', req.url));
 });
 
-router.use(express.static(__dirname + '/public/secure'));
 
 module.exports = router;

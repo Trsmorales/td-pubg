@@ -1,0 +1,31 @@
+head
+  meta(charset='utf-8')
+  title Login Page
+  meta(name='viewport', content='width=device-width, initial-scale=1, shirnk-to-fit=no')
+  link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css', integrity='sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb', crossorigin='anonymous')
+  link(rel='stylesheet', type='text/css', href='public/stylesheets/style.css')
+.container.mt-4
+  .container.text-center.text-dark
+    h1.display-3.font-weight-bold TOP DOWN PUB-G
+    | &#x9;&#x9;&#x9;
+    p.lead Coming Soon, a Turn Based Battle Royale Game.
+  |         
+  .container.pubg-form.mt-5.p-5.rounded(style='width: 500px;')
+    p
+      | You have been sucesfully logged out. To login with another account click 
+      a(href='/login') Here
+      | .
+    |             
+    p#server-time Server time: 18:17:33 GMT-0500 (Eastern Standard Time)
+| &#x9;
+script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js', integrity='sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin='anonymous')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js', integrity='sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh', crossorigin='anonymous')
+script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js', integrity='sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ', crossorigin='anonymous')
+script(src='public/javascripts/scripts.js', type='text/javascript')
+script(src='/socket.io/socket.io.js')
+script.
+  var socket = io();
+  var el = document.getElementById('server-time');
+  socket.on('time', function(timeString) {
+  el.innerHTML = 'Server time: ' + timeString;
+  });

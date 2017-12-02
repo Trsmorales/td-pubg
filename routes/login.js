@@ -3,7 +3,7 @@ var router = express.Router();
 var path = require('path');
 
 router.get('/', function(req, res, next) {
-  res.sendFile(path.join(__dirname, '../public/', 'login.html'));
+  	res.render(path.join(__dirname, '../views/', 'login'));
 });
 
 router.post('/register', function(req, res, next) {
@@ -18,7 +18,7 @@ router.post('/', function(req, res, next) {
     {
 			req.session.authenticated = true;
         console.log("Authenticated Redirecting to Secure");
-			res.redirect('/secure/index.html');
+			res.redirect('/secure/index');
 		} else {
 			//req.flash('error', 'Username and password are incorrect');
 			res.redirect('/login');

@@ -4,7 +4,7 @@ var path = require('path');
 
 router.get('/', function(req, res, next) {
   delete req.session.authenticated;
-  res.sendFile(path.join(__dirname, '../public/', 'logout.html'));
+  res.render(path.join(__dirname, '../views/', 'logout'));
 });
 
 module.exports = router;

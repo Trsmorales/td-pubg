@@ -9,6 +9,7 @@ var http = require('http');
 var debug = require('debug')('td-pubgExpressApp:server');
 var session = require('express-session');
 var flash = require('express-flash');
+var pug = require('pug');
 
 var login = require('./routes/login');
 var logout = require('./routes/logout');
@@ -18,15 +19,17 @@ var port = normalizePort(process.env.PORT || '3000');
 
 var app = express();
 
-var options = {
-  index: 'login.html'
-};
+//ar options = {
+//  index: 'login'
+//};
 
 var server = http.createServer(app);
 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -39,9 +42,11 @@ app.use(session({ secret: (process.env.PORT || 'development'),
                   saveUninitialized: false
                 }));
 app.use(checkAuth);
-app.use(express.static(__dirname + '/public', options));
+app.use('/public', express.static(path.resolve(__dirname, 'public')));
 app.use(flash());
 
+//app.use('/public', public);
+app.use('/', login);
 app.use('/login', login);
 app.use('/logout', logout);
 app.use('/secure', secure);
