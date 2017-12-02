@@ -34,7 +34,10 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({ secret: 'example' }));
+app.use(session({ secret: (process.env.PORT || 'development'),
+                  resave: false,
+                  saveUninitialized: false
+                }));
 app.use(checkAuth);
 app.use(express.static(__dirname + '/public', options));
 app.use(flash());
