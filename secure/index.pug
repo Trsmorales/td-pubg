@@ -31,7 +31,10 @@ button.btn.btn-lg.btn-success.play(type='button') PLAY
 |     
 .container.mt-4
   .container.text-center.text-white
-    h1.display-3.font-weight-bold.pt-5 Welcome, Name!
+    -if(successes)
+      h1.display-3.font-weight-bold.pt-5 !{successes}
+    - else
+      h1.display-3.font-weight-bold.pt-5 Welcome!
     |             
     p.lead There Should be a game here... and here is the initial screen.
   |         

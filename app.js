@@ -37,7 +37,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({ secret: (process.env.PORT || 'development'),
+app.use(session({ secret: (process.env.SESSION_SECRET || 'development'),
                   resave: false,
                   saveUninitialized: false
                 }));
