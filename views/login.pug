@@ -46,6 +46,13 @@ head
           |                         
           .text-center
             button.btn.btn-primary.btn-block(type='submit') Submit
+          |
+        -if(successes)
+          p
+          .alert.alert-success !{successes}
+        -if(errors)
+          p
+          .alert.alert-danger !{errors}
       // Second Form
       .register
         form.text-dark(action='/login/register', method='post')
@@ -80,7 +87,7 @@ script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.
 script(src='public/javascripts/scripts.js', type='text/javascript')
 |     
 script(src='/socket.io/socket.io.js')
-|     
+|   
 script.
   var socket = io();
   var el = document.getElementById('server-time');
