@@ -90,7 +90,7 @@ router.post('/', function(req, res, next) {
 			} 
 			else {
 				console.log('Username not found ' + err);
-				res.redirect('/login?registration=false');
+				res.redirect('/login?login=false');
 			}
 		});
 	}
