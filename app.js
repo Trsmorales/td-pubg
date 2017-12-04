@@ -10,6 +10,7 @@ var debug = require('debug')('td-pubgExpressApp:server');
 var session = require('express-session');
 var flash = require('express-flash');
 var pug = require('pug');
+var redis = require('redis');
 
 var login = require('./routes/login');
 var logout = require('./routes/logout');
@@ -29,7 +30,15 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+var redisClient = redis.createClient(process.env.REDIS_URL 
+                                      || 'redis://h:pc8c04396132ff399ff08c7b502c31ad2e6effa1edb7ca5ee82ea7506c94b2a37@ec2-34-239-85-93.compute-1.amazonaws.com:13209');
+
+redisClient.on('connect', function() {
+    console.log('Connected to redis.');
+});
+
 app.set('view engine', 'pug');
+app.set('redisClient', redisClient);
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

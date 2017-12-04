@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var utils = require('./utils');
+var utils = require('./Utilities/utils');
 
 /* GET home page. */
 router.get('/*', function(req, res, next) {
