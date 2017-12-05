@@ -1,0 +1,11 @@
+doctype html
+center
+  canvas#myCanvas(width='1260', height='720', style='border:5px solid #CACACA;') Your browser does not support the HTML5 canvas tag.
+script.
+  var c = document.getElementById("myCanvas");
+  var ctx = c.getContext("2d");
+  ctx.fillStyle = '#FFA500';
+  ctx.beginPath();
+  ctx.arc(200, 200, 40, 0, 2 * Math.PI);
+  ctx.stroke();
+  ctx.fill();
