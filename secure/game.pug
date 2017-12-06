@@ -1,11 +1,6 @@
-doctype html
-head
-  script(src='../public/javascripts/lib/easel.js')
-  |
-  script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js', integrity='sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin='anonymous')
-  |      
-  script(src='../public/javascripts/game.js')
-  |
-body(onload='init()')
-  center
-      canvas#canvas(width='1260', height='720' , style=';border:5px solid #CACACA;')
+extends ../views/header.pug
+
+block content
+    body(onload='init()')
+      center
+          canvas#canvas(width='1260', height='720' , style=';border:5px solid #CACACA;')
