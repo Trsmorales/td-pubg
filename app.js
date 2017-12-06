@@ -24,7 +24,6 @@ var app = express();
 // Locals
 
 app.locals.version = pjson.version;
-console.log(app.locals.version);
 
 //ar options = {
 //  index: 'login'
