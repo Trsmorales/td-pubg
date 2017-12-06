@@ -49,3 +49,10 @@ body {
 	bottom: 4vh;
 	right: 3vh;
 }
+.version {
+    width: 300px;
+    height: 20px;
+    position: absolute;
+	bottom: 5vh;
+	right: calc(50vw - 150px);
+}

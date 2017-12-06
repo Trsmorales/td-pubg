@@ -20,8 +20,8 @@ block content
         |
         a(href='/secure/game')
           button.btn.btn-lg.btn-success.play(type='button') PLAY
-
-        |
+        .version.text-center
+            p#version Version: #{version}
         .container.mt-4
           .container.text-center.text-white
             -if(successes)

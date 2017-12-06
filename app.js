@@ -11,6 +11,7 @@ var session = require('express-session');
 var flash = require('express-flash');
 var pug = require('pug');
 var redis = require('redis');
+var pjson = require('./package.json');
 
 var login = require('./routes/login');
 var logout = require('./routes/logout');
@@ -19,6 +20,11 @@ var secure = require('./routes/secure');
 var port = normalizePort(process.env.PORT || '3000');
 
 var app = express();
+
+// Locals
+
+app.locals.version = pjson.version;
+console.log(app.locals.version);
 
 //ar options = {
 //  index: 'login'
