@@ -83,9 +83,9 @@ function handleTick() {
     }
     //Prevent out of bounds
     if(player.y > GAMEBOUNDSY) player.y = GAMEBOUNDSY;
-    if(player.X > GAMEBOUNDSY) player.X = GAMEBOUNDSX;
-    if(player.Y < 0) player.Y = 0;
-    if(player.X < 0) player.X = 0;
+    if(player.x > GAMEBOUNDSX) player.x = GAMEBOUNDSX;
+    if(player.y < 0) player.y = 0;
+    if(player.x < 0) player.x = 0;
 
     stage.update();
 }
