@@ -111,7 +111,7 @@ window.addEventListener('keyup',
     },
 false);
 
-var socket = io.connect('http://td-pubg.herokuapp.com');
+var socket = io.connect('https://td-pubg.herokuapp.com');
 setInterval(() => socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y }), 40);
 
 socket.on('time', function(timeString) {
