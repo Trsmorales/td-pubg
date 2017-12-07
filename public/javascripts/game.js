@@ -3,18 +3,27 @@ var GAMEBOUNDSX;
 var GAMEBOUNDSY;
 var canvas;
 var stage; 
-const PLAYER_SPEED = 5;
+var PLAYER_SPEED = 5;
 var Keys = [];
+var socket = io();
+var serverTime;
+var myID;
+var opponentArray = [];
 
 var KEYCODE_LEFT = 68, 
     KEYCODE_RIGHT = 65,
     KEYCODE_UP = 87, 
     KEYCODE_DOWN = 83;
+    KEYCODE_SHIFT = 16;
 
 function init() {
     stage = new createjs.Stage("canvas");
     //Update stage will render next frame
     createjs.Ticker.addEventListener("tick", handleTick);
+    //Create socket connection and Gather relevent sharing objects.
+    serverTime = document.getElementById('server-time');
+
+    myId = socket.id;
 
     canvas =  document.getElementById('canvas');
     GAMEBOUNDSX = canvas.width;
@@ -22,17 +31,34 @@ function init() {
     canvas.style.backgroundColor = "White";
 
     player = new createjs.Shape();
-    player.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 25);
-    player.x = 100;
-    player.y = 100;
+    // Create a random color
+    player.graphics.beginFill("rgba(" 
+                            + parseInt(Math.random()*255) +"," 
+                            + parseInt(Math.random()*255) +"," 
+                            + parseInt(Math.random()*255) +",1)").drawCircle(0, 0, 25);
+    //Start at a random pos
+    player.x = parseInt(Math.random()*GAMEBOUNDSX);
+    player.y = parseInt(Math.random()*GAMEBOUNDSY);
     stage.addChild(player);
-
+    //At this point make 20 opponents, we should change this as some point
+    //All 20 will be drawn off the map, this is really bad
+    for(var i = 0; i < 20; i++){
+        opponentArray[i] = new createjs.Shape();
+        opponentArray[i].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 25);
+        opponentArray[i].x = -100;
+        opponentArray[i].y = -100;
+        stage.addChild(opponentArray[i]);
+    }
     stage.update();
 }
 
 
 function handleTick() {
-    //This isnt great but I need to think of a way to 
+
+    //reset playerspeed for any case shift is not held down
+    PLAYER_SPEED = 5;
+
+    //This isnt great but I need to think of a way to
     for(var i = 0; i < Keys.length; i++){
         var key = Keys[i];
         if(key){
@@ -49,6 +75,9 @@ function handleTick() {
             case KEYCODE_DOWN: 
                 player.y += PLAYER_SPEED;
                 break;
+            case KEYCODE_SHIFT:
+                PLAYER_SPEED = 8;
+                break;
             }
         }
     }
@@ -59,6 +88,14 @@ function handleTick() {
     if(player.X < 0) player.X = 0;
 
     stage.update();
+}
+
+function drawOpponents(sharedData, myId){
+    for(var i = 0; i < sharedData.length; i++){
+        if(sharedData[i].id != socket.id)//Dont draw myself.
+        opponentArray[i].x = sharedData[i].x;
+        opponentArray[i].y = sharedData[i].y;
+    }
 }
 
 
@@ -73,4 +110,15 @@ window.addEventListener('keyup',
         Keys[e.keyCode] = false;
     },
 false);
+
+var socket = io.connect('http://localhost:3000');
+setInterval(() => socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y }), 40);
+
+socket.on('time', function(timeString) {
+serverTime.innerHTML = 'Server time: ' + timeString;
+});
+
+socket.on('serverUpdate', function(sharedData) {
+    drawOpponents(sharedData);
+});
 

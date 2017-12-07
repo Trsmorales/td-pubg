@@ -21,8 +21,9 @@ var port = normalizePort(process.env.PORT || '3000');
 
 var app = express();
 
-// Locals
+var clientSharedData = [];
 
+// Locals
 app.locals.version = pjson.version;
 
 //ar options = {
@@ -87,10 +88,23 @@ const io = socketIO(server);
 
 io.on('connection', (socket) => {
   console.log('Client connected');
+  socket.on('playerUpdate', function(playerUpdate) {
+    if(playerUpdate && playerUpdate.id)
+      var found = false;
+      for(var i = 0; i < clientSharedData.length; i++){
+        if(clientSharedData[i].id == playerUpdate.id){//Already have this player overwrite
+          clientSharedData[i] = playerUpdate;
+          found = true;
+        }
+      }
+      if(!found)//New Player Add them to the sharedData
+        clientSharedData.push(playerUpdate);
+  });
   socket.on('disconnect', () => console.log('Client disconnected'));
 });
 
 setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
+setInterval(() => io.emit('serverUpdate', clientSharedData), 40);
 
 module.exports = app;
 
