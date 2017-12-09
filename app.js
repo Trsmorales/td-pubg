@@ -25,7 +25,7 @@ var clientSharedData = [];
 
 // Locals
 app.locals.version = pjson.version;
-
+app.locals.socketAddress = (process.env.PORT) ? "'https://td-pubg.herokuapp.com'" : "http://localhost:3000";
 //ar options = {
 //  index: 'login'
 //};
@@ -87,8 +87,9 @@ app.use(function(err, req, res, next) {
 const io = socketIO(server);
 
 io.on('connection', (socket) => {
-  console.log('Client connected');
+  console.log('Client connected' + socket.id);
   socket.on('playerUpdate', function(playerUpdate) {
+    console.log("player update from:" + playerUpdate.id);
     if(playerUpdate && playerUpdate.id)
       var found = false;
       for(var i = 0; i < clientSharedData.length; i++){
@@ -100,7 +101,18 @@ io.on('connection', (socket) => {
       if(!found)//New Player Add them to the sharedData
         clientSharedData.push(playerUpdate);
   });
-  socket.on('disconnect', () => console.log('Client disconnected'));
+  socket.on('disconnect', function() {
+    for(var i = 0; i < clientSharedData.length; i++){
+      if(clientSharedData[i].id == socket.id){
+        clientSharedData[i].x = -100;
+        clientSharedData[i].y = -100;
+        //push this data one last time to draw the player off the map.
+        io.emit('serverUpdate', clientSharedData)
+        clientSharedData.splice(i,1);
+        console.log("Disconnected" + socket.id);
+      }
+    }
+  });
 });
 
 setInterval(() => io.emit('time', new Date().toTimeString()), 1000);

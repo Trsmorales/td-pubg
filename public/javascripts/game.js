@@ -92,9 +92,11 @@ function handleTick() {
 
 function drawOpponents(sharedData, myId){
     for(var i = 0; i < sharedData.length; i++){
-        if(sharedData[i].id != socket.id)//Dont draw myself.
+        if(sharedData[i] && sharedData[i].x && sharedData[i].y && sharedData[i].id != socket.id){//Dont draw myself.
         opponentArray[i].x = sharedData[i].x;
         opponentArray[i].y = sharedData[i].y;
+        //console.log(sharedData[i]);
+        }
     }
 }
 
@@ -111,7 +113,8 @@ window.addEventListener('keyup',
     },
 false);
 
-var socket = io.connect('https://td-pubg.herokuapp.com');
+
+var socket = io.connect("http://localhost:3000");
 setInterval(() => socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y }), 40);
 
 socket.on('time', function(timeString) {

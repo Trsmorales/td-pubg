@@ -1,6 +1,9 @@
 extends ../views/header.pug
 block content
     body(onload='init()')
+      script
+        include ../public/javascripts/game.js
+        include ../public/javascripts/lib/easel.js
       center
           canvas#canvas(width='1260', height='720' , style=';border:5px solid #CACACA;')
     .version.text-center
