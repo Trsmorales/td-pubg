@@ -25,7 +25,7 @@ var clientSharedData = [];
 
 // Locals
 app.locals.version = pjson.version;
-app.locals.socketAddress = (process.env.PORT) ? "'https://td-pubg.herokuapp.com'" : "http://localhost:3000";
+app.locals.socketAddress = (process.env.PORT) ? "https://td-pubg.herokuapp.com" : "http://localhost:3000";
 //ar options = {
 //  index: 'login'
 //};
