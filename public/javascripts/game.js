@@ -7,6 +7,7 @@ var PLAYER_SPEED = 5;
 var Keys = [];
 var socket = io();
 var serverTime;
+var serverURL;
 var myID;
 var opponentArray = [];
 
@@ -22,7 +23,9 @@ function init() {
     createjs.Ticker.addEventListener("tick", handleTick);
     //Create socket connection and Gather relevent sharing objects.
     serverTime = document.getElementById('server-time');
+    serverURL = document.getElementById('server-url');
 
+    var socket = io.connect(serverURL.textContent);
     myId = socket.id;
 
     canvas =  document.getElementById('canvas');
@@ -91,8 +94,9 @@ function handleTick() {
 }
 
 function drawOpponents(sharedData, myId){
+    if(opponentArray.length == 0) return;//ServerUpdate before we init the canvas, ignore this.
     for(var i = 0; i < sharedData.length; i++){
-        if(sharedData[i] && sharedData[i].x && sharedData[i].y && sharedData[i].id != socket.id){//Dont draw myself.
+        if(sharedData[i].id != socket.id){//Dont draw myself.
         opponentArray[i].x = sharedData[i].x;
         opponentArray[i].y = sharedData[i].y;
         //console.log(sharedData[i]);
@@ -113,8 +117,6 @@ window.addEventListener('keyup',
     },
 false);
 
-
-var socket = io.connect("http://localhost:3000");
 setInterval(function() { 
                         if(player) socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y });
                         }, 40);
