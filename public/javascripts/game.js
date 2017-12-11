@@ -115,7 +115,9 @@ false);
 
 
 var socket = io.connect("http://localhost:3000");
-setInterval(() => socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y }), 40);
+setInterval(function() { 
+                        if(player) socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y });
+                        }, 40);
 
 socket.on('time', function(timeString) {
 serverTime.innerHTML = 'Server time: ' + timeString;

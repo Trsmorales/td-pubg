@@ -87,9 +87,9 @@ app.use(function(err, req, res, next) {
 const io = socketIO(server);
 
 io.on('connection', (socket) => {
-  console.log('Client connected' + socket.id);
+  console.log('Client: ' + socket.id + ' connected.');
   socket.on('playerUpdate', function(playerUpdate) {
-    console.log("player update from:" + playerUpdate.id);
+    //console.log("player update from:" + playerUpdate.id);
     if(playerUpdate && playerUpdate.id)
       var found = false;
       for(var i = 0; i < clientSharedData.length; i++){
@@ -109,7 +109,7 @@ io.on('connection', (socket) => {
         //push this data one last time to draw the player off the map.
         io.emit('serverUpdate', clientSharedData)
         clientSharedData.splice(i,1);
-        console.log("Disconnected" + socket.id);
+        console.log("Client: " + socket.id + " disconnected.");
       }
     }
   });
