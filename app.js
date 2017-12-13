@@ -17,7 +17,9 @@ var login = require('./routes/login');
 var logout = require('./routes/logout');
 var secure = require('./routes/secure');
 
-var port = normalizePort(process.env.PORT || '3000');
+var utils = require('./routes/Utilities/utils');
+
+var port = utils.normalizePort(process.env.PORT || '3000');
 
 var app = express();
 
@@ -33,7 +35,7 @@ app.locals.socketAddress = (process.env.PORT) ? "https://td-pubg.herokuapp.com" 
 var server = http.createServer(app);
 
 server.listen(port);
-server.on('error', onError);
+server.on('error', utils.onError);
 server.on('listening', onListening);
 
 var redisClient = redis.createClient(process.env.REDIS_URL 
@@ -56,11 +58,11 @@ app.use(session({ secret: (process.env.SESSION_SECRET || 'development'),
                   resave: false,
                   saveUninitialized: false
                 }));
+
 app.use(checkAuth);
 app.use('/public', express.static(path.resolve(__dirname, 'public')));
 app.use(flash());
 
-//app.use('/public', public);
 app.use('/', login);
 app.use('/login', login);
 app.use('/logout', logout);
@@ -84,6 +86,8 @@ app.use(function(err, req, res, next) {
   res.send('Error' + err.message);
 });
 
+
+//Socket IO logic
 const io = socketIO(server);
 
 io.on('connection', (socket) => {
@@ -120,51 +124,9 @@ setInterval(() => io.emit('serverUpdate', clientSharedData), 40);
 
 module.exports = app;
 
-
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
