@@ -1,11 +1,23 @@
 extends ../views/header.pug
 block content
-    body(onload='init()')
+    body.game(onload='init()')
       script
         include ../public/javascripts/game.js
         include ../public/javascripts/lib/easel.js
+      .top-right-nav
+          a(href='/secure/game')
+            button.btn.btn-primary(type='button')
+              i.fa.fa-refresh(aria-hidden='true')
+          |
+          button.btn.btn-primary(type='button')
+            i.fa.fa-cog(aria-hidden='true')
+          |
+          a(href='/logout')
+            button.btn.btn-primary(type='button')
+              i.fa.fa-sign-out(aria-hidden='true')
       center
-          canvas#canvas(width='1260', height='720' , style=';border:5px solid #CACACA;')
+          h1 TD-PUBG
+          canvas#canvas(width='1160', height='620' , style=';border:3px solid rgba(0,0,0,0.7);')
     .version.text-center
             p#version Version: #{version}
             p#server-time

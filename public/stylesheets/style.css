@@ -46,13 +46,28 @@ body {
 }
 #server-time {
 	position: absolute;
-	bottom: 4vh;
+	bottom: 2vh;
 	right: 3vh;
 }
 .version {
     width: 300px;
     height: 20px;
     position: absolute;
-	bottom: 5vh;
+	bottom: 9vh;
 	right: calc(50vw - 150px);
+}
+#canvas {
+    -webkit-box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+    -moz-box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+    box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+    margin-top: -2vh;
+}
+.game {
+    background-image: url("../images/main-background.jpg");
+    
+}
+.game h1 {
+    font-size: 120px;
+    margin-top: 5vh;
+    font-family: 'Teko', sans-serif;
 }
