@@ -18,8 +18,35 @@ block content
         |
         button.btn.btn-primary.invite-btn(type='button') Invite Friends
         |
-        a(href='/secure/game')
-          button.btn.btn-lg.btn-success.play(type='button') PLAY
+        a(href='#') 
+          button.btn.btn-lg.btn-success.play(type='button', data-toggle='modal', data-target='#exampleModal') PLAY
+        // MODAL
+        #exampleModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='exampleModalLabel', aria-hidden='true')
+          .modal-dialog(role='document')
+            .modal-content
+              .modal-header
+                h5#exampleModalLabel.modal-title.text-dark Create A Server!
+                button.close(type='button', data-dismiss='modal', aria-label='Close')
+                  span(aria-hidden='true') ×
+              .modal-body
+                form
+                  .form-row
+                      .form-group.col-md-6
+                          label(for='inputZip') Zip
+                          input#inputZip.form-control(type='text', placeholder='Enter A Zip Code')
+                      .form-group.col-md-6
+                          label(for='inputSize') Size
+                          select#inputState.form-control
+                            option(selected='') Choose Size...
+                            option Small 1km x 1km
+                            option Medium 2km x 2km
+                            option Large 4km x 4km
+                .map
+              .modal-footer
+                button.btn.btn-danger(type='button', data-dismiss='modal') Cancel
+                a(href='/secure/game')
+                    button.btn.btn-primary(type='button') Submit
+        // CLOSE MODAL
         .version.text-center
             p#version Version: #{version}
         .container.mt-4
