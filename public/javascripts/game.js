@@ -2,7 +2,7 @@ var player;
 var GAMEBOUNDSX;
 var GAMEBOUNDSY;
 var canvas;
-var stage; 
+var stage;
 var PLAYER_SPEED = 5;
 var Keys = [];
 var socket = io();
@@ -11,11 +11,15 @@ var serverURL;
 var myID;
 var opponentArray = [];
 
-var KEYCODE_LEFT = 68, 
+var KEYCODE_LEFT = 68,
     KEYCODE_RIGHT = 65,
-    KEYCODE_UP = 87, 
+    KEYCODE_UP = 87,
     KEYCODE_DOWN = 83;
     KEYCODE_SHIFT = 16;
+    KEYCODE_ARRUP = 38;
+    KEYCODE_ARRLEFT = 39;
+    KEYCODE_ARRDOWN = 40;
+    KEYCODE_ARRIGHT = 37;
 
 function init() {
     stage = new createjs.Stage("canvas");
@@ -35,9 +39,9 @@ function init() {
 
     player = new createjs.Shape();
     // Create a random color
-    player.graphics.beginFill("rgba(" 
-                            + parseInt(Math.random()*255) +"," 
-                            + parseInt(Math.random()*255) +"," 
+    player.graphics.beginFill("rgba("
+                            + parseInt(Math.random()*255) +","
+                            + parseInt(Math.random()*255) +","
                             + parseInt(Math.random()*255) +",1)").drawCircle(0, 0, 25);
     //Start at a random pos
     player.x = parseInt(Math.random()*GAMEBOUNDSX);
@@ -66,16 +70,20 @@ function handleTick() {
         var key = Keys[i];
         if(key){
             switch(i) {
-            case KEYCODE_LEFT:	
+            case KEYCODE_LEFT:
+            case KEYCODE_ARRLEFT:
                 player.x += PLAYER_SPEED;
                 break;
-            case KEYCODE_RIGHT: 
-                player.x -= PLAYER_SPEED; 
+            case KEYCODE_RIGHT:
+            case KEYCODE_ARRIGHT:
+                player.x -= PLAYER_SPEED;
                 break;
-            case KEYCODE_UP: 
+            case KEYCODE_UP:
+            case KEYCODE_ARRUP:
                 player.y -= PLAYER_SPEED;
                 break;
-            case KEYCODE_DOWN: 
+            case KEYCODE_DOWN:
+            case KEYCODE_ARRDOWN:
                 player.y += PLAYER_SPEED;
                 break;
             case KEYCODE_SHIFT:
@@ -85,10 +93,10 @@ function handleTick() {
         }
     }
     //Prevent out of bounds
-    if(player.y > GAMEBOUNDSY) player.y = GAMEBOUNDSY;
-    if(player.x > GAMEBOUNDSX) player.x = GAMEBOUNDSX;
-    if(player.y < 0) player.y = 0;
-    if(player.x < 0) player.x = 0;
+    if(player.y > (GAMEBOUNDSY - 25)) player.y = (GAMEBOUNDSY - 25);
+    if(player.x > (GAMEBOUNDSX - 25)) player.x = (GAMEBOUNDSX - 25);
+    if(player.y < 25) player.y = 25;
+    if(player.x < 25) player.x = 25;
 
     stage.update();
 }
@@ -104,6 +112,11 @@ function drawOpponents(sharedData, myId){
     }
 }
 
+$(window).blur(function(e) {
+  for( i = 0; i < Keys.length; i++ ) {
+        Keys[i] = false;
+  }
+});
 
 window.addEventListener("keydown",
     function(e){
@@ -117,7 +130,7 @@ window.addEventListener('keyup',
     },
 false);
 
-setInterval(function() { 
+setInterval(function() {
                         if(player) socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y });
                         }, 40);
 
@@ -128,4 +141,3 @@ serverTime.innerHTML = 'Server time: ' + timeString;
 socket.on('serverUpdate', function(sharedData) {
     drawOpponents(sharedData);
 });
-
