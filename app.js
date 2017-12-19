@@ -59,7 +59,7 @@ app.use(session({ secret: (process.env.SESSION_SECRET || 'development'),
                   saveUninitialized: false
                 }));
 
-app.use(checkAuth);
+//app.use(checkAuth);
 app.use('/public', express.static(path.resolve(__dirname, 'public')));
 app.use(flash());
 
@@ -133,18 +133,4 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-}
-
-function checkAuth (req, res, next) {
-	console.log('checkAuth for ' + req.url);
-
-	// don't serve /secure to those not logged in
-	// you should add to this list, for each and every secure url
-	if (req.url.startsWith("/secure") && (!req.session || !req.session.authenticated)) {
-    console.log('unauthorized');
-		res.send('unauthorized', { status: 403 });
-		return;
-	}
-
-	next();
 }

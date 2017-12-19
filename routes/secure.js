@@ -3,6 +3,8 @@ var router = express.Router();
 var path = require('path');
 var utils = require('./Utilities/utils');
 
+router.use(checkAuth);
+
 /* GET home page. */
 router.get('/*', function(req, res, next) {
   console.log("In Secure, routing to: "+ req.path);
@@ -16,5 +18,18 @@ router.get('/*', function(req, res, next) {
   }
 });
 
+function checkAuth (req, res, next) {
+	console.log('checkAuth for ' + req.url);
+
+	// don't serve /secure to those not logged in
+	// you should add to this list, for each and every secure url
+	if (!req.session || !req.session.authenticated) {
+    console.log('unauthorized');
+		res.status(403).send('unauthorized');
+		return;
+	}
+
+	next();
+}
 
 module.exports = router;
