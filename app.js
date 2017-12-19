@@ -59,7 +59,6 @@ app.use(session({ secret: (process.env.SESSION_SECRET || 'development'),
                   saveUninitialized: false
                 }));
 
-//app.use(checkAuth);
 app.use('/public', express.static(path.resolve(__dirname, 'public')));
 app.use(flash());
 

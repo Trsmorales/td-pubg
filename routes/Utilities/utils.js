@@ -20,6 +20,20 @@ module.exports = {
         return false;
     },
 
+    checkAuth: function(req, res, next) {
+        console.log('checkAuth for ' + req.url);
+        
+        // don't serve /secure to those not logged in
+        // you should add to this list, for each and every secure url
+        if (!req.session || !req.session.authenticated) {
+        console.log('unauthorized');
+            res.status(403).send('unauthorized');
+            return;
+        }
+    
+        next();
+    },
+
     onError: function (error) {
         if (error.syscall !== 'listen') {
             throw error;

@@ -3,7 +3,7 @@ var router = express.Router();
 var path = require('path');
 var utils = require('./Utilities/utils');
 
-router.use(checkAuth);
+router.use(utils.checkAuth);
 
 /* GET home page. */
 router.get('/*', function(req, res, next) {
@@ -17,19 +17,5 @@ router.get('/*', function(req, res, next) {
     res.render(path.join(__dirname, '../secure', req.path), {successes: req.flash('WelcomeLogin')});
   }
 });
-
-function checkAuth (req, res, next) {
-	console.log('checkAuth for ' + req.url);
-
-	// don't serve /secure to those not logged in
-	// you should add to this list, for each and every secure url
-	if (!req.session || !req.session.authenticated) {
-    console.log('unauthorized');
-		res.status(403).send('unauthorized');
-		return;
-	}
-
-	next();
-}
 
 module.exports = router;
