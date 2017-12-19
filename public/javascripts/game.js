@@ -9,7 +9,7 @@ var socket = io();
 var serverTime;
 var serverURL;
 var myID;
-var opponentArray = [];
+var opponents = {};
 
 var KEYCODE_LEFT = 68,
     KEYCODE_RIGHT = 65,
@@ -47,15 +47,6 @@ function init() {
     player.x = parseInt(Math.random()*GAMEBOUNDSX);
     player.y = parseInt(Math.random()*GAMEBOUNDSY);
     stage.addChild(player);
-    //At this point make 20 opponents, we should change this as some point
-    //All 20 will be drawn off the map, this is really bad
-    for(var i = 0; i < 20; i++){
-        opponentArray[i] = new createjs.Shape();
-        opponentArray[i].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 25);
-        opponentArray[i].x = -100;
-        opponentArray[i].y = -100;
-        stage.addChild(opponentArray[i]);
-    }
     stage.update();
 }
 
@@ -102,12 +93,20 @@ function handleTick() {
 }
 
 function drawOpponents(sharedData, myId){
-    if(opponentArray.length == 0) return;//ServerUpdate before we init the canvas, ignore this.
+    if(!stage) return; //init did not run yet
     for(var i = 0; i < sharedData.length; i++){
-        if(sharedData[i].id != socket.id){//Dont draw myself.
-        opponentArray[i].x = sharedData[i].x;
-        opponentArray[i].y = sharedData[i].y;
-        //console.log(sharedData[i]);
+        var id = sharedData[i].id
+        if(id == socket.id) //Dont draw myself.
+            continue;
+        if(opponents[id]) { //Old opponent
+            opponents[id].x = sharedData[i].x;
+            opponents[id].y = sharedData[i].y;
+        } else { //New opponent
+            opponents[id] = new createjs.Shape();
+            opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 25);
+            opponents[id].x = sharedData[i].x;
+            opponents[id].y = sharedData[i].y;
+            stage.addChild(opponents[id]);
         }
     }
 }
