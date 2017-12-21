@@ -1,12 +1,16 @@
 var geolib = require('geolib');
 var parseString = require('xml2js').parseString;
+var request = require('request');
+
 fs = require('fs')
 
 var newWorld = {};
 newWorld.bounds = {};
 newWorld.ways = [];
 
-function createBoundingBox(){
+
+
+function createBoundingBox(latitude,longitude,width,height){
 
     /*Arguments:    0,1 Reserved
                     2 Center Latitude
@@ -14,12 +18,17 @@ function createBoundingBox(){
                     4 Map Width (default 1600M)
                     5 Map Height (default 900M)
     */
+    latitude = latitude || process.argv[2];
+    longitude = longitude || process.argv[3];
+    width = width || process.argv[4];
+    height = height || process.argv[5];
 
     //Start In center
-    var initialPoint = {lat: parseFloat(process.argv[2]), lon: parseFloat(process.argv[3])}
+    var initialPoint = {lat: latitude, lon: longitude}
 
     //Move up half the height
-    var dist = parseInt(process.argv[5]) / 2;
+    //console.log(width)
+    var dist = width / 2;
     var bearing = 0;
     var topLat = geolib.computeDestinationPoint(initialPoint, dist, bearing).latitude;
 
@@ -27,12 +36,12 @@ function createBoundingBox(){
     bearing = 180
     var bottomLat = geolib.computeDestinationPoint(initialPoint, dist, bearing).latitude;
 
-    //Now Move right half the height
+    //Now Move right half the width
     bearing = 90
-    dist = parseInt(process.argv[4]) / 2;
+    dist = height / 2;
     var rightLon = geolib.computeDestinationPoint(initialPoint, dist, bearing).longitude;
 
-    //Now Move left half the height
+    //Now Move left half the width
     bearing = 270
     var leftLon = geolib.computeDestinationPoint(initialPoint, dist, bearing).longitude;
 
@@ -52,13 +61,9 @@ function createBoundingBox(){
 
     console.log("URL: \t" + url);
 
-    return {top: topLat, bottom: bottomLat, left: leftLon, right: rightLon}
+    return {top: topLat, bottom: bottomLat, left: leftLon, right: rightLon, url: url}
 }
 
-function requestOSMData(url){
-    var data = {};
-    return data;
-}
 
 function GenerateWays(worldJS){
     var ways = worldJS.way;
@@ -92,11 +97,26 @@ function LookupCoords(ref, worldJS){
 
 //Get Bounding box based on input.
 var boundingBox = createBoundingBox();
+
 //Make the call to OSM
-var urlData = requestOSMData(boundingBox.url);
+request(boundingBox.url, function (error, response, body) {
+    console.log('error:', error); // Print the error if one occurred
+    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+    parseString(body, function (err, result) {
+        //Copy Bounds
+        newWorld.bounds = result.osm.bounds[0].$;
+        //Create Ways
+        GenerateWays(result.osm);
+        //Write to file.
+        fs.writeFile("./public/assets/SmallWorldMap.json", JSON.stringify(newWorld), (err) => {
+            if (err) throw err;
+            console.log('The file has been saved!');
+        });
+    });
+});
 //OR
 //Read File
-fs.readFile("./public/assets/SmallWorldMap.xml", 'utf8', function (err,data) {
+/*fs.readFile("./public/assets/SmallWorldMap.xml", 'utf8', function (err,data) {
     if (err) {
       return console.log(err);
     }
@@ -111,5 +131,5 @@ fs.readFile("./public/assets/SmallWorldMap.xml", 'utf8', function (err,data) {
             console.log('The file has been saved!');
         });
     });
-});
+});*/
 
