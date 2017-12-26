@@ -1,4 +1,4 @@
-var player;
+
 var GAMEBOUNDSX;
 var GAMEBOUNDSY;
 var canvas;
@@ -9,7 +9,12 @@ var socket = io();
 var serverTime;
 var serverURL;
 var myID;
+
+var player;
 var opponents = {};
+var worldObjects = [];
+var gameWorld;
+var coordBounds;
 
 var KEYCODE_LEFT = 68,
     KEYCODE_RIGHT = 65,
@@ -20,6 +25,14 @@ var KEYCODE_LEFT = 68,
     KEYCODE_ARRLEFT = 39;
     KEYCODE_ARRDOWN = 40;
     KEYCODE_ARRIGHT = 37;
+
+$(document).ready(function(){
+    $.getJSON("../public/assets/SampleWorldMap.json", function(result){
+        coordBounds = result.bounds
+        gameWorld = result.ways
+        init();
+    });
+});
 
 function init() {
     stage = new createjs.Stage("canvas");
@@ -42,11 +55,16 @@ function init() {
     player.graphics.beginFill("rgba("
                             + parseInt(Math.random()*255) +","
                             + parseInt(Math.random()*255) +","
-                            + parseInt(Math.random()*255) +",1)").drawCircle(0, 0, 25);
+                            + parseInt(Math.random()*255) +",1)").drawCircle(0, 0, 10);
     //Start at a random pos
     player.x = parseInt(Math.random()*GAMEBOUNDSX);
     player.y = parseInt(Math.random()*GAMEBOUNDSY);
     stage.addChild(player);
+
+    for(var i = 0; i < gameWorld.length; i++){
+        drawBuilding(gameWorld[i]);
+    }
+
     stage.update();
 }
 
@@ -92,7 +110,41 @@ function handleTick() {
     stage.update();
 }
 
-function drawOpponents(sharedData, myId){
+function drawBuilding(gameObj){
+    //First Check if its a building or not
+    var isBuilding = false;
+
+    //no tags? return;
+    if(!gameObj.tag)
+        return;
+
+    for(var i = 0; i < gameObj.tag.length; i++){
+        if(gameObj.tag[i].$.k == "building")
+            isBuilding = true;
+    }
+    if(!isBuilding)
+        return;
+
+    //Were a building for now the pos is based on GAMEBOUNDS
+    var newObj = new createjs.Shape();
+    newObj.graphics.beginStroke("rgba(139,69,19,1)");
+    //Start at 0,0
+    newObj.graphics.moveTo(0,0);
+    for(var j = 0; j < gameObj.nodes.length; j++){
+        var x = getRelativeX(gameObj.nodes[j].lon);
+        var y = getRelativeY(gameObj.nodes[j].lat);
+        //First point is a move to.
+        if(j == 0)
+            newObj.graphics.moveTo(x,y);
+        else
+            newObj.graphics.lineTo(x,y);
+    }
+    newObj.graphics.endStroke();
+    worldObjects.push(newObj);
+    stage.addChild(newObj);
+}
+
+function moveOpponents(sharedData, myId){
     if(!stage) return; //init did not run yet
     for(var i = 0; i < sharedData.length; i++){
         var id = sharedData[i].id
@@ -103,12 +155,34 @@ function drawOpponents(sharedData, myId){
             opponents[id].y = sharedData[i].y;
         } else { //New opponent
             opponents[id] = new createjs.Shape();
-            opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 25);
+            opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 10);
             opponents[id].x = sharedData[i].x;
             opponents[id].y = sharedData[i].y;
             stage.addChild(opponents[id]);
         }
     }
+}
+
+//Lon
+function getRelativeX(lon){
+    //first reduce
+    lon = lon - coordBounds.minlon;
+    var reducedMaxlon = coordBounds.maxlon - coordBounds.minlon
+    //then get the ratio of location based on gamebounds.
+    var lonPercentage = lon / reducedMaxlon;
+    var x = lonPercentage * GAMEBOUNDSX * 4;
+    return parseInt(x);
+}
+
+//Lat
+function getRelativeY(lat){
+    //first reduce
+    lat = lat - coordBounds.minlat;
+    var reducedMaxlat = coordBounds.maxlat - coordBounds.minlat
+    //then get the ratio of location based on gamebounds.
+    var latPercentage = lat / reducedMaxlat;
+    var y = latPercentage * GAMEBOUNDSY * 8;
+    return parseInt(y);
 }
 
 $(window).blur(function(e) {
@@ -134,9 +208,10 @@ setInterval(function() {
                         }, 40);
 
 socket.on('time', function(timeString) {
-serverTime.innerHTML = 'Server time: ' + timeString;
+    if(serverTime)
+        serverTime.innerHTML = 'Server time: ' + timeString;
 });
 
 socket.on('serverUpdate', function(sharedData) {
-    drawOpponents(sharedData);
+    moveOpponents(sharedData);
 });

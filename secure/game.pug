@@ -1,6 +1,6 @@
 extends ../views/header.pug
 block content
-    body.game(onload='init()')
+    body.game()
       script
         include ../public/javascripts/game.js
         include ../public/javascripts/lib/easel.js
@@ -17,7 +17,7 @@ block content
               i.fa.fa-sign-out(aria-hidden='true')
       center
           h1 TD-PUBG
-          canvas#canvas(width='1160', height='620' , style=';border:3px solid rgba(0,0,0,0.7);')
+          canvas#canvas(width='1600', height='800' , style=';border:3px solid rgba(0,0,0,0.7);')
     .version.text-center
             p#version Version: #{version}
             p#server-time

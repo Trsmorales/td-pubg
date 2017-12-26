@@ -108,7 +108,7 @@ request(boundingBox.url, function (error, response, body) {
         //Create Ways
         GenerateWays(result.osm);
         //Write to file.
-        fs.writeFile("./public/assets/SmallWorldMap.json", JSON.stringify(newWorld), (err) => {
+        fs.writeFile("./public/assets/SampleWorldMap.json", JSON.stringify(newWorld), (err) => {
             if (err) throw err;
             console.log('The file has been saved!');
         });
@@ -116,7 +116,7 @@ request(boundingBox.url, function (error, response, body) {
 });
 //OR
 //Read File
-/*fs.readFile("./public/assets/SmallWorldMap.xml", 'utf8', function (err,data) {
+fs.readFile("./public/assets/SampleWorldMap.xml", 'utf8', function (err,data) {
     if (err) {
       return console.log(err);
     }
@@ -126,10 +126,10 @@ request(boundingBox.url, function (error, response, body) {
         //Create Ways
         GenerateWays(result.osm);
         //Write to file.
-        fs.writeFile("./public/assets/SmallWorldMap.json", JSON.stringify(newWorld), (err) => {
+        fs.writeFile("./public/assets/SampleWorldMap.json", JSON.stringify(newWorld), (err) => {
             if (err) throw err;
             console.log('The file has been saved!');
         });
     });
-});*/
+});
 
