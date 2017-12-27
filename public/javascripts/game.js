@@ -9,6 +9,14 @@ var socket = io();
 var serverTime;
 var serverURL;
 var myID;
+const XSCALAR = 16;
+const YSCALAR = 9;
+const SCROLLBOUNDRY = 100;
+
+const UP = 1;
+const DOWN = 2;
+const LEFT = 3;
+const RIGHT = 4;
 
 var player;
 var opponents = {};
@@ -48,7 +56,7 @@ function init() {
     canvas =  document.getElementById('canvas');
     GAMEBOUNDSX = canvas.width;
     GAMEBOUNDSY = canvas.height;
-    canvas.style.backgroundColor = "White";
+    canvas.style.backgroundColor = "#b5d6a9";
 
     player = new createjs.Shape();
     // Create a random color
@@ -73,35 +81,34 @@ function handleTick() {
 
     //reset playerspeed for any case shift is not held down
     PLAYER_SPEED = 5;
-
     //This isnt great but I need to think of a way to
     for(var i = 0; i < Keys.length; i++){
         var key = Keys[i];
         if(key){
             switch(i) {
-            case KEYCODE_LEFT:
-            case KEYCODE_ARRLEFT:
-                player.x += PLAYER_SPEED;
-                break;
-            case KEYCODE_RIGHT:
-            case KEYCODE_ARRIGHT:
-                player.x -= PLAYER_SPEED;
-                break;
-            case KEYCODE_UP:
-            case KEYCODE_ARRUP:
-                player.y -= PLAYER_SPEED;
-                break;
-            case KEYCODE_DOWN:
-            case KEYCODE_ARRDOWN:
-                player.y += PLAYER_SPEED;
-                break;
-            case KEYCODE_SHIFT:
-                PLAYER_SPEED = 8;
-                break;
+                case KEYCODE_LEFT:
+                case KEYCODE_ARRLEFT:
+                    movePlayer(LEFT, PLAYER_SPEED);
+                    break;
+                case KEYCODE_RIGHT:
+                case KEYCODE_ARRIGHT:
+                    movePlayer(RIGHT, PLAYER_SPEED);
+                    break;
+                case KEYCODE_UP:
+                case KEYCODE_ARRUP:
+                    movePlayer(UP, PLAYER_SPEED);
+                    break;
+                case KEYCODE_DOWN:
+                case KEYCODE_ARRDOWN:
+                    movePlayer(DOWN, PLAYER_SPEED);
+                    break;
+                case KEYCODE_SHIFT:
+                    PLAYER_SPEED = 8;
+                    break;
             }
         }
     }
-    //Prevent out of bounds
+    //Prevent out of bounds** We should never get here now, but just in case :)
     if(player.y > (GAMEBOUNDSY - 25)) player.y = (GAMEBOUNDSY - 25);
     if(player.x > (GAMEBOUNDSX - 25)) player.x = (GAMEBOUNDSX - 25);
     if(player.y < 25) player.y = 25;
@@ -109,6 +116,7 @@ function handleTick() {
 
     stage.update();
 }
+
 
 function drawBuilding(gameObj){
     //First Check if its a building or not
@@ -127,9 +135,9 @@ function drawBuilding(gameObj){
 
     //Were a building for now the pos is based on GAMEBOUNDS
     var newObj = new createjs.Shape();
-    newObj.graphics.beginStroke("rgba(139,69,19,1)");
+    newObj.graphics.beginStroke("#743b0a");
+    newObj.graphics.setStrokeStyle(5);
     //Start at 0,0
-    newObj.graphics.moveTo(0,0);
     for(var j = 0; j < gameObj.nodes.length; j++){
         var x = getRelativeX(gameObj.nodes[j].lon);
         var y = getRelativeY(gameObj.nodes[j].lat);
@@ -144,6 +152,47 @@ function drawBuilding(gameObj){
     stage.addChild(newObj);
 }
 
+function movePlayer(direction, distance){
+    var shouldScroll = false;
+    //first check if player is at scroll limit.
+    if( player.y > (GAMEBOUNDSY - SCROLLBOUNDRY) ||
+        player.x > (GAMEBOUNDSX - SCROLLBOUNDRY) ||
+        player.y < SCROLLBOUNDRY ||
+        player.x < SCROLLBOUNDRY) shouldScroll = true;
+
+    if( (player.y > (GAMEBOUNDSY - SCROLLBOUNDRY) && direction != DOWN) ||
+        (player.x > (GAMEBOUNDSX - SCROLLBOUNDRY) && direction != LEFT) ||
+        (player.y < SCROLLBOUNDRY && direction != UP) ||
+        (player.x < SCROLLBOUNDRY && direction != RIGHT)) shouldScroll = false;    
+    if(shouldScroll)
+        moveBuildings(direction,distance);
+    else//standard move within scroll box.
+        move(player,direction,distance);
+}
+
+function moveBuildings(direction, distance){
+    for(var i = 0; i < worldObjects.length; i++){
+        move(worldObjects[i],direction,-distance);
+    }
+}
+
+
+function move(object, direction, distance){
+    switch(direction) {
+        case LEFT:
+            object.x += distance;
+            break;
+        case RIGHT:
+            object.x -= distance;
+            break;
+        case UP:
+            object.y -= distance;
+            break;
+        case DOWN:
+            object.y += distance;
+            break;
+    }
+}
 function moveOpponents(sharedData, myId){
     if(!stage) return; //init did not run yet
     for(var i = 0; i < sharedData.length; i++){
@@ -170,7 +219,7 @@ function getRelativeX(lon){
     var reducedMaxlon = coordBounds.maxlon - coordBounds.minlon
     //then get the ratio of location based on gamebounds.
     var lonPercentage = lon / reducedMaxlon;
-    var x = lonPercentage * GAMEBOUNDSX * 4;
+    var x = lonPercentage * GAMEBOUNDSX * YSCALAR;
     return parseInt(x);
 }
 
@@ -181,7 +230,7 @@ function getRelativeY(lat){
     var reducedMaxlat = coordBounds.maxlat - coordBounds.minlat
     //then get the ratio of location based on gamebounds.
     var latPercentage = lat / reducedMaxlat;
-    var y = latPercentage * GAMEBOUNDSY * 8;
+    var y = (latPercentage * GAMEBOUNDSY * XSCALAR);
     return parseInt(y);
 }
 
