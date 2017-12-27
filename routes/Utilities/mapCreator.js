@@ -5,23 +5,29 @@ var request = require('request');
 fs = require('fs')
 
 var newWorld = {};
+var filename;
 newWorld.bounds = {};
 newWorld.ways = [];
 
 
 
-function createBoundingBox(latitude,longitude,width,height){
+function createBoundingBox(latitude,longitude,width,height,name){
 
     /*Arguments:    0,1 Reserved
                     2 Center Latitude
                     3 Center Longitude
                     4 Map Width (default 1600M)
                     5 Map Height (default 900M)
+                    6 filename
     */
+
+    //node routes/Utilities/mapCreator.js 42.54919 -71.46780 1600 900 SampleWorldMap.json
+
     latitude = latitude || process.argv[2];
     longitude = longitude || process.argv[3];
     width = width || process.argv[4];
     height = height || process.argv[5];
+    filename = name || process.argv[6];
 
     //Start In center
     var initialPoint = {lat: latitude, lon: longitude}
@@ -108,7 +114,7 @@ request(boundingBox.url, function (error, response, body) {
         //Create Ways
         GenerateWays(result.osm);
         //Write to file.
-        fs.writeFile("./public/assets/SampleWorldMap.json", JSON.stringify(newWorld), (err) => {
+        fs.writeFile("./public/assets/" + filename, JSON.stringify(newWorld), (err) => {
             if (err) throw err;
             console.log('The file has been saved!');
         });
@@ -116,7 +122,7 @@ request(boundingBox.url, function (error, response, body) {
 });
 //OR
 //Read File
-fs.readFile("./public/assets/SampleWorldMap.xml", 'utf8', function (err,data) {
+/*fs.readFile("./public/assets/BostonWorldMap.xml", 'utf8', function (err,data) {
     if (err) {
       return console.log(err);
     }
@@ -126,10 +132,10 @@ fs.readFile("./public/assets/SampleWorldMap.xml", 'utf8', function (err,data) {
         //Create Ways
         GenerateWays(result.osm);
         //Write to file.
-        fs.writeFile("./public/assets/SampleWorldMap.json", JSON.stringify(newWorld), (err) => {
+        fs.writeFile("./public/assets/BostonWorldMap.json", JSON.stringify(newWorld), (err) => {
             if (err) throw err;
             console.log('The file has been saved!');
         });
     });
-});
+});*/
 

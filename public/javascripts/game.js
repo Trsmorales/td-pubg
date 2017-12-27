@@ -11,7 +11,8 @@ var serverURL;
 var myID;
 const XSCALAR = 16;
 const YSCALAR = 9;
-const SCROLLBOUNDRY = 100;
+const SCROLLBOUNDRY = 250;
+const ROADMULTPLIER = 8;
 
 const UP = 1;
 const DOWN = 2;
@@ -35,7 +36,7 @@ var KEYCODE_LEFT = 68,
     KEYCODE_ARRIGHT = 37;
 
 $(document).ready(function(){
-    $.getJSON("../public/assets/SampleWorldMap.json", function(result){
+    $.getJSON("../public/assets/BostonWorldMap.json", function(result){
         coordBounds = result.bounds
         gameWorld = result.ways
         init();
@@ -67,12 +68,13 @@ function init() {
     //Start at a random pos
     player.x = parseInt(Math.random()*GAMEBOUNDSX);
     player.y = parseInt(Math.random()*GAMEBOUNDSY);
-    stage.addChild(player);
+
 
     for(var i = 0; i < gameWorld.length; i++){
+        drawRoad(gameWorld[i]);
         drawBuilding(gameWorld[i]);
     }
-
+    stage.addChild(player);
     stage.update();
 }
 
@@ -109,10 +111,10 @@ function handleTick() {
         }
     }
     //Prevent out of bounds** We should never get here now, but just in case :)
-    if(player.y > (GAMEBOUNDSY - 25)) player.y = (GAMEBOUNDSY - 25);
-    if(player.x > (GAMEBOUNDSX - 25)) player.x = (GAMEBOUNDSX - 25);
-    if(player.y < 25) player.y = 25;
-    if(player.x < 25) player.x = 25;
+    if(player.y > (GAMEBOUNDSY - player.graphics.command.radius)) player.y = (GAMEBOUNDSY - player.graphics.command.radius);
+    if(player.x > (GAMEBOUNDSX - player.graphics.command.radius)) player.x = (GAMEBOUNDSX - player.graphics.command.radius);
+    if(player.y < player.graphics.command.radius) player.y = player.graphics.command.radius;
+    if(player.x < player.graphics.command.radius) player.x = player.graphics.command.radius;
 
     stage.update();
 }
@@ -120,24 +122,11 @@ function handleTick() {
 
 function drawBuilding(gameObj){
     //First Check if its a building or not
-    var isBuilding = false;
-
-    //no tags? return;
-    if(!gameObj.tag)
+    if(!getTag(gameObj,"building"))
         return;
-
-    for(var i = 0; i < gameObj.tag.length; i++){
-        if(gameObj.tag[i].$.k == "building")
-            isBuilding = true;
-    }
-    if(!isBuilding)
-        return;
-
-    //Were a building for now the pos is based on GAMEBOUNDS
     var newObj = new createjs.Shape();
     newObj.graphics.beginStroke("#743b0a");
     newObj.graphics.setStrokeStyle(5);
-    //Start at 0,0
     for(var j = 0; j < gameObj.nodes.length; j++){
         var x = getRelativeX(gameObj.nodes[j].lon);
         var y = getRelativeY(gameObj.nodes[j].lat);
@@ -150,6 +139,44 @@ function drawBuilding(gameObj){
     newObj.graphics.endStroke();
     worldObjects.push(newObj);
     stage.addChild(newObj);
+}
+
+function drawRoad(gameObj){
+    //First Check if its a road or not
+    if(!getTag(gameObj,"highway"))
+        return;
+    var road = new createjs.Shape();
+    road.graphics.beginStroke("#666666");
+    var hwyWidth = getTag(gameObj,"width");
+    if(hwyWidth){
+        var centerLine = new createjs.Shape();
+        centerLine.graphics.beginStroke("#ffcc00");
+        centerLine.graphics.setStrokeStyle(1.2 * ROADMULTPLIER);
+        road.graphics.setStrokeStyle(hwyWidth * ROADMULTPLIER);
+    }
+    else
+        road.graphics.setStrokeStyle(5 * ROADMULTPLIER);
+    for(var j = 0; j < gameObj.nodes.length; j++){
+        var x = getRelativeX(gameObj.nodes[j].lon);
+        var y = getRelativeY(gameObj.nodes[j].lat);
+        //First point is a move to.
+        if(j == 0){
+            road.graphics.moveTo(x,y);
+            if(hwyWidth)
+                centerLine.graphics.moveTo(x,y);
+        }
+        else{
+            road.graphics.lineTo(x,y);
+            if(hwyWidth)
+                centerLine.graphics.lineTo(x,y);
+        }
+    }
+    worldObjects.push(road);
+    stage.addChild(road);
+    if(hwyWidth){
+        worldObjects.push(centerLine);
+        stage.addChild(centerLine);
+    }
 }
 
 function movePlayer(direction, distance){
@@ -193,6 +220,20 @@ function move(object, direction, distance){
             break;
     }
 }
+
+//returns tag, if non returns false.
+function getTag(gameObj, tag){   
+    //no tags? return;
+    if(!gameObj.tag)
+        return false;
+
+    for(var i = 0; i < gameObj.tag.length; i++){
+        if(gameObj.tag[i].$.k == tag)
+            return gameObj.tag[i].$.v;
+    }
+    return false;
+}
+
 function moveOpponents(sharedData, myId){
     if(!stage) return; //init did not run yet
     for(var i = 0; i < sharedData.length; i++){
@@ -231,6 +272,7 @@ function getRelativeY(lat){
     //then get the ratio of location based on gamebounds.
     var latPercentage = lat / reducedMaxlat;
     var y = (latPercentage * GAMEBOUNDSY * XSCALAR);
+    y = GAMEBOUNDSY - y; //WHAT Canvas and OSM have different 0,0 ??
     return parseInt(y);
 }
 
