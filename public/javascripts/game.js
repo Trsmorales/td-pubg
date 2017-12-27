@@ -58,20 +58,20 @@ function init() {
     GAMEBOUNDSX = canvas.width;
     GAMEBOUNDSY = canvas.height;
     canvas.style.backgroundColor = "#b5d6a9";
-
-    player.shape = new createjs.Shape();
+    player = new GameObject();
     // Create a random color
-    player.shape.graphics.beginFill("rgba("
-                            + parseInt(Math.random()*255) +","
-                            + parseInt(Math.random()*255) +","
-                            + parseInt(Math.random()*255) +",1)").drawCircle(0, 0, 10);
+    player.color = "rgba("
+                    + parseInt(Math.random()*255) +","
+                    + parseInt(Math.random()*255) +","
+                    + parseInt(Math.random()*255) +",1)";
+    player.shape.graphics.beginFill(player.color).drawCircle(0, 0, 10);
     //Start at a center global pos
     player.x = parseInt(.5*GAMEBOUNDSX * XSCALAR);
     player.y = parseInt(.5*GAMEBOUNDSY * YSCALAR);
 
     //start at screen center
-    player.shape.x = parseInt(GAMEBOUNDSX/2);
-    player.shape.y = parseInt(GAMEBOUNDSY/2);
+    player.shape.x = parseInt(GAMEBOUNDSX/2);//parseInt(Math.random()*(GAMEBOUNDSX));
+    player.shape.y = parseInt(GAMEBOUNDSY/2);//parseInt(Math.random()*(GAMEBOUNDSY));
 
     for(var i = 0; i < gameWorld.length; i++){
         drawRoad(gameWorld[i]);
@@ -132,58 +132,58 @@ function drawBuilding(gameObj){
     //First Check if its a building or not
     if(!getTag(gameObj,"building"))
         return;
-    var newObj = new createjs.Shape();
-    newObj.graphics.beginStroke("#743b0a");
-    newObj.graphics.setStrokeStyle(5);
+    var newBuilding = new GameObject();
+    newBuilding.shape.graphics.beginStroke("#743b0a");
+    newBuilding.shape.graphics.setStrokeStyle(5);
     for(var j = 0; j < gameObj.nodes.length; j++){
         var x = getRelativeXFromLon(gameObj.nodes[j].lon);
         var y = getRelativeYFromLat(gameObj.nodes[j].lat);
         //First point is a move to.
         if(j == 0)
-            newObj.graphics.moveTo(x,y);
+            newBuilding.shape.graphics.moveTo(x,y);
         else
-            newObj.graphics.lineTo(x,y);
+            newBuilding.shape.graphics.lineTo(x,y);
     }
-    newObj.graphics.endStroke();
-    worldObjects.push(newObj);
-    stage.addChild(newObj);
+    newBuilding.shape.graphics.endStroke();
+    worldObjects.push(newBuilding);
+    stage.addChild(newBuilding.shape);
 }
 
 function drawRoad(gameObj){
     //First Check if its a road or not
     if(!getTag(gameObj,"highway"))
         return;
-    var road = new createjs.Shape();
-    road.graphics.beginStroke("#666666");
+    var newRoad = new GameObject();
+    newRoad.shape.graphics.beginStroke("#666666");
     var hwyWidth = getTag(gameObj,"width");
     if(hwyWidth){
-        var centerLine = new createjs.Shape();
-        centerLine.graphics.beginStroke("#ffcc00");
-        centerLine.graphics.setStrokeStyle(1.2 * ROADMULTPLIER);
-        road.graphics.setStrokeStyle(hwyWidth * ROADMULTPLIER);
+        var centerLine = new GameObject();
+        centerLine.shape.graphics.beginStroke("#ffcc00");
+        centerLine.shape.graphics.setStrokeStyle(1.2 * ROADMULTPLIER);
+        newRoad.shape.graphics.setStrokeStyle(hwyWidth * ROADMULTPLIER);
     }
     else
-        road.graphics.setStrokeStyle(5 * ROADMULTPLIER);
+        newRoad.shape.graphics.setStrokeStyle(5 * ROADMULTPLIER);
     for(var j = 0; j < gameObj.nodes.length; j++){
         var x = getRelativeXFromLon(gameObj.nodes[j].lon);
         var y = getRelativeYFromLat(gameObj.nodes[j].lat);
         //First point is a move to.
         if(j == 0){
-            road.graphics.moveTo(x,y);
+            newRoad.shape.graphics.moveTo(x,y);
             if(hwyWidth)
-                centerLine.graphics.moveTo(x,y);
+                centerLine.shape.graphics.moveTo(x,y);
         }
         else{
-            road.graphics.lineTo(x,y);
+            newRoad.shape.graphics.lineTo(x,y);
             if(hwyWidth)
-                centerLine.graphics.lineTo(x,y);
+                centerLine.shape.graphics.lineTo(x,y);
         }
     }
-    worldObjects.push(road);
-    stage.addChild(road);
+    worldObjects.push(newRoad);
+    stage.addChild(newRoad.shape);
     if(hwyWidth){
         worldObjects.push(centerLine);
-        stage.addChild(centerLine);
+        stage.addChild(centerLine.shape);
     }
 }
 
@@ -215,21 +215,21 @@ function moveOpponents(sharedData, myId){
         if(id == socket.id) //Dont draw myself.
             continue;
         if(opponents[id]) { //Old opponent
-            opponents[id].x = getRelativeX(sharedData[i].x);
-            opponents[id].y = getRelativeY(sharedData[i].y);
+            opponents[id].shape.x = player.getRelativeX(sharedData[i].x);
+            opponents[id].shape.y = player.getRelativeY(sharedData[i].y);
         } else { //New opponent
-            opponents[id] = new createjs.Shape();
-            opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 10);
-            opponents[id].x = getRelativeX(sharedData[i].x);
-            opponents[id].y = getRelativeY(sharedData[i].y);
-            stage.addChild(opponents[id]);
+            opponents[id] = new GameObject();
+            opponents[id].shape.graphics.beginFill(sharedData[i].color).drawCircle(0, 0, 10);
+            opponents[id].shape.x = player.getRelativeX(sharedData[i].x);
+            opponents[id].shape.y = player.getRelativeY(sharedData[i].y);
+            stage.addChild(opponents[id].shape);
         }
     }
 }
 
 function moveBuildings(direction, distance){
     for(var i = 0; i < worldObjects.length; i++){
-        move(worldObjects[i],direction,-distance);
+        move(worldObjects[i].shape,direction,-distance);
     }
 }
 
@@ -291,20 +291,6 @@ function getRelativeYFromLat(lat){
     return parseInt(y);
 }
 
-function getRelativeX(globalX){
-    //If were more then a screen away dont draw
-    if(Math.abs(player.x -globalX) > GAMEBOUNDSX) return -100;
-    var diff = player.x - globalX;
-    return player.shape.x - diff;
-}
-
-function getRelativeY(globalY){
-    //If were more then a screen away dont draw
-    if(Math.abs(player.y -globalY) > GAMEBOUNDSY) return -100;
-    var diff = player.y - globalY;
-    return player.shape.y - diff;
-}
-
 //returns tag, if non returns false.
 function getTag(gameObj, tag){   
     //no tags? return;
@@ -340,7 +326,7 @@ window.addEventListener('keyup',
 false);
 
 setInterval(function() {
-                        if(player) socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y });
+                        if(player) socket.emit('playerUpdate', {id: socket.id, x: player.x, y: player.y , color: player.color});
                         }, 40);
 
 socket.on('time', function(timeString) {
@@ -352,3 +338,27 @@ socket.on('time', function(timeString) {
 socket.on('serverUpdate', function(sharedData) {
     moveOpponents(sharedData);
 });
+
+
+class GameObject {
+    constructor(x=0,y=0){
+        this.x = x;//Global Position
+        this.y = y;//Global Position
+        this.shape = new createjs.Shape();
+        this.color = "rgba(0,0,0,1)";
+    }
+
+    getRelativeX(globalX){
+        //If were more then a screen away dont draw
+        if(Math.abs(this.x -globalX) > GAMEBOUNDSX) return -100;
+        var diff = this.x - globalX;
+        return this.shape.x - diff;
+    }
+    
+    getRelativeY(globalY){
+        //If were more then a screen away dont draw
+        if(Math.abs(this.y -globalY) > GAMEBOUNDSY) return -100;
+        var diff = this.y - globalY;
+        return this.shape.y - diff;
+    }
+}
