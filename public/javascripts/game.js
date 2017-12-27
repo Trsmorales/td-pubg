@@ -19,8 +19,8 @@ const DOWN = 2;
 const LEFT = 3;
 const RIGHT = 4;
 
-var player;
-var opponents = {};
+var player = {};
+var opponents = [];
 var worldObjects = [];
 var gameWorld;
 var coordBounds;
@@ -59,22 +59,30 @@ function init() {
     GAMEBOUNDSY = canvas.height;
     canvas.style.backgroundColor = "#b5d6a9";
 
-    player = new createjs.Shape();
+    player.shape = new createjs.Shape();
     // Create a random color
-    player.graphics.beginFill("rgba("
+    player.shape.graphics.beginFill("rgba("
                             + parseInt(Math.random()*255) +","
                             + parseInt(Math.random()*255) +","
                             + parseInt(Math.random()*255) +",1)").drawCircle(0, 0, 10);
-    //Start at a random pos
-    player.x = parseInt(Math.random()*GAMEBOUNDSX);
-    player.y = parseInt(Math.random()*GAMEBOUNDSY);
+    //Start at a center global pos
+    player.x = parseInt(.5*GAMEBOUNDSX * XSCALAR);
+    player.y = parseInt(.5*GAMEBOUNDSY * YSCALAR);
 
+    //start at screen center
+    player.shape.x = parseInt(GAMEBOUNDSX/2);
+    player.shape.y = parseInt(GAMEBOUNDSY/2);
 
     for(var i = 0; i < gameWorld.length; i++){
         drawRoad(gameWorld[i]);
         drawBuilding(gameWorld[i]);
     }
-    stage.addChild(player);
+    //We start bottom center because of how map is drawn
+    //Move buildings to match random global pos
+    moveBuildings(UP,player.y);
+    moveBuildings(LEFT,player.x/2);
+
+    stage.addChild(player.shape);
     stage.update();
 }
 
@@ -111,10 +119,10 @@ function handleTick() {
         }
     }
     //Prevent out of bounds** We should never get here now, but just in case :)
-    if(player.y > (GAMEBOUNDSY - player.graphics.command.radius)) player.y = (GAMEBOUNDSY - player.graphics.command.radius);
-    if(player.x > (GAMEBOUNDSX - player.graphics.command.radius)) player.x = (GAMEBOUNDSX - player.graphics.command.radius);
-    if(player.y < player.graphics.command.radius) player.y = player.graphics.command.radius;
-    if(player.x < player.graphics.command.radius) player.x = player.graphics.command.radius;
+    if(player.shape.y > (GAMEBOUNDSY - player.shape.graphics.command.radius)) player.shape.y = (GAMEBOUNDSY - player.shape.graphics.command.radius);
+    if(player.shape.x > (GAMEBOUNDSX - player.shape.graphics.command.radius)) player.shape.x = (GAMEBOUNDSX - player.shape.graphics.command.radius);
+    if(player.shape.y < player.shape.graphics.command.radius) player.shape.y = player.shape.graphics.command.radius;
+    if(player.shape.x < player.shape.graphics.command.radius) player.shape.x = player.shape.graphics.command.radius;
 
     stage.update();
 }
@@ -128,8 +136,8 @@ function drawBuilding(gameObj){
     newObj.graphics.beginStroke("#743b0a");
     newObj.graphics.setStrokeStyle(5);
     for(var j = 0; j < gameObj.nodes.length; j++){
-        var x = getRelativeX(gameObj.nodes[j].lon);
-        var y = getRelativeY(gameObj.nodes[j].lat);
+        var x = getRelativeXFromLon(gameObj.nodes[j].lon);
+        var y = getRelativeYFromLat(gameObj.nodes[j].lat);
         //First point is a move to.
         if(j == 0)
             newObj.graphics.moveTo(x,y);
@@ -157,8 +165,8 @@ function drawRoad(gameObj){
     else
         road.graphics.setStrokeStyle(5 * ROADMULTPLIER);
     for(var j = 0; j < gameObj.nodes.length; j++){
-        var x = getRelativeX(gameObj.nodes[j].lon);
-        var y = getRelativeY(gameObj.nodes[j].lat);
+        var x = getRelativeXFromLon(gameObj.nodes[j].lon);
+        var y = getRelativeYFromLat(gameObj.nodes[j].lat);
         //First point is a move to.
         if(j == 0){
             road.graphics.moveTo(x,y);
@@ -182,19 +190,21 @@ function drawRoad(gameObj){
 function movePlayer(direction, distance){
     var shouldScroll = false;
     //first check if player is at scroll limit.
-    if( player.y > (GAMEBOUNDSY - SCROLLBOUNDRY) ||
-        player.x > (GAMEBOUNDSX - SCROLLBOUNDRY) ||
-        player.y < SCROLLBOUNDRY ||
-        player.x < SCROLLBOUNDRY) shouldScroll = true;
+    if( player.shape.y > (GAMEBOUNDSY - SCROLLBOUNDRY) ||
+        player.shape.x > (GAMEBOUNDSX - SCROLLBOUNDRY) ||
+        player.shape.y < SCROLLBOUNDRY ||
+        player.shape.x < SCROLLBOUNDRY) shouldScroll = true;
 
-    if( (player.y > (GAMEBOUNDSY - SCROLLBOUNDRY) && direction != DOWN) ||
-        (player.x > (GAMEBOUNDSX - SCROLLBOUNDRY) && direction != LEFT) ||
-        (player.y < SCROLLBOUNDRY && direction != UP) ||
-        (player.x < SCROLLBOUNDRY && direction != RIGHT)) shouldScroll = false;    
+    if( (player.shape.y > (GAMEBOUNDSY - SCROLLBOUNDRY) && direction != DOWN) ||
+        (player.shape.x > (GAMEBOUNDSX - SCROLLBOUNDRY) && direction != LEFT) ||
+        (player.shape.y < SCROLLBOUNDRY && direction != UP) ||
+        (player.shape.x < SCROLLBOUNDRY && direction != RIGHT)) shouldScroll = false;    
     if(shouldScroll)
         moveBuildings(direction,distance);
     else//standard move within scroll box.
-        move(player,direction,distance);
+        move(player.shape,direction,distance);
+
+    updatePlayerGlobal(direction, distance)
 }
 
 function moveBuildings(direction, distance){
@@ -221,6 +231,23 @@ function move(object, direction, distance){
     }
 }
 
+function updatePlayerGlobal(direction, distance){
+    switch(direction) {
+        case LEFT:
+            player.x += distance;
+            break;
+        case RIGHT:
+            player.x -= distance;
+            break;
+        case UP:
+            player.y -= distance;
+            break;
+        case DOWN:
+            player.y += distance;
+            break;
+    }
+}
+
 //returns tag, if non returns false.
 function getTag(gameObj, tag){   
     //no tags? return;
@@ -235,26 +262,27 @@ function getTag(gameObj, tag){
 }
 
 function moveOpponents(sharedData, myId){
+    //Now working with absolute world position.
     if(!stage) return; //init did not run yet
     for(var i = 0; i < sharedData.length; i++){
         var id = sharedData[i].id
         if(id == socket.id) //Dont draw myself.
             continue;
         if(opponents[id]) { //Old opponent
-            opponents[id].x = sharedData[i].x;
-            opponents[id].y = sharedData[i].y;
+            opponents[id].x = getRelativeX(sharedData[i].x);
+            opponents[id].y = getRelativeY(sharedData[i].y);
         } else { //New opponent
             opponents[id] = new createjs.Shape();
             opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 10);
-            opponents[id].x = sharedData[i].x;
-            opponents[id].y = sharedData[i].y;
+            opponents[id].x = getRelativeX(sharedData[i].x);
+            opponents[id].y = getRelativeY(sharedData[i].y);
             stage.addChild(opponents[id]);
         }
     }
 }
 
 //Lon
-function getRelativeX(lon){
+function getRelativeXFromLon(lon){
     //first reduce
     lon = lon - coordBounds.minlon;
     var reducedMaxlon = coordBounds.maxlon - coordBounds.minlon
@@ -265,7 +293,7 @@ function getRelativeX(lon){
 }
 
 //Lat
-function getRelativeY(lat){
+function getRelativeYFromLat(lat){
     //first reduce
     lat = lat - coordBounds.minlat;
     var reducedMaxlat = coordBounds.maxlat - coordBounds.minlat
@@ -274,6 +302,20 @@ function getRelativeY(lat){
     var y = (latPercentage * GAMEBOUNDSY * XSCALAR);
     y = GAMEBOUNDSY - y; //WHAT Canvas and OSM have different 0,0 ??
     return parseInt(y);
+}
+
+function getRelativeX(globalX){
+    //If were more then a screen away dont draw
+    if(Math.abs(player.x -globalX) > GAMEBOUNDSX) return -100;
+    var diff = player.x - globalX;
+    return player.shape.x - diff;
+}
+
+function getRelativeY(globalY){
+    //If were more then a screen away dont draw
+    if(Math.abs(player.y -globalY) > GAMEBOUNDSY) return -100;
+    var diff = player.y - globalY;
+    return player.shape.y - diff;
 }
 
 $(window).blur(function(e) {
@@ -301,6 +343,7 @@ setInterval(function() {
 socket.on('time', function(timeString) {
     if(serverTime)
         serverTime.innerHTML = 'Server time: ' + timeString;
+        console.log("Player: "+ player.x + " , " + player.y);
 });
 
 socket.on('serverUpdate', function(sharedData) {
