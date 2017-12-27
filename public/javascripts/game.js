@@ -207,6 +207,26 @@ function movePlayer(direction, distance){
     updatePlayerGlobal(direction, distance)
 }
 
+function moveOpponents(sharedData, myId){
+    //Now working with absolute world position.
+    if(!stage) return; //init did not run yet
+    for(var i = 0; i < sharedData.length; i++){
+        var id = sharedData[i].id
+        if(id == socket.id) //Dont draw myself.
+            continue;
+        if(opponents[id]) { //Old opponent
+            opponents[id].x = getRelativeX(sharedData[i].x);
+            opponents[id].y = getRelativeY(sharedData[i].y);
+        } else { //New opponent
+            opponents[id] = new createjs.Shape();
+            opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 10);
+            opponents[id].x = getRelativeX(sharedData[i].x);
+            opponents[id].y = getRelativeY(sharedData[i].y);
+            stage.addChild(opponents[id]);
+        }
+    }
+}
+
 function moveBuildings(direction, distance){
     for(var i = 0; i < worldObjects.length; i++){
         move(worldObjects[i],direction,-distance);
@@ -248,39 +268,6 @@ function updatePlayerGlobal(direction, distance){
     }
 }
 
-//returns tag, if non returns false.
-function getTag(gameObj, tag){   
-    //no tags? return;
-    if(!gameObj.tag)
-        return false;
-
-    for(var i = 0; i < gameObj.tag.length; i++){
-        if(gameObj.tag[i].$.k == tag)
-            return gameObj.tag[i].$.v;
-    }
-    return false;
-}
-
-function moveOpponents(sharedData, myId){
-    //Now working with absolute world position.
-    if(!stage) return; //init did not run yet
-    for(var i = 0; i < sharedData.length; i++){
-        var id = sharedData[i].id
-        if(id == socket.id) //Dont draw myself.
-            continue;
-        if(opponents[id]) { //Old opponent
-            opponents[id].x = getRelativeX(sharedData[i].x);
-            opponents[id].y = getRelativeY(sharedData[i].y);
-        } else { //New opponent
-            opponents[id] = new createjs.Shape();
-            opponents[id].graphics.beginFill("rgba(0,0,0,1)").drawCircle(0, 0, 10);
-            opponents[id].x = getRelativeX(sharedData[i].x);
-            opponents[id].y = getRelativeY(sharedData[i].y);
-            stage.addChild(opponents[id]);
-        }
-    }
-}
-
 //Lon
 function getRelativeXFromLon(lon){
     //first reduce
@@ -318,10 +305,26 @@ function getRelativeY(globalY){
     return player.shape.y - diff;
 }
 
+//returns tag, if non returns false.
+function getTag(gameObj, tag){   
+    //no tags? return;
+    if(!gameObj.tag)
+        return false;
+
+    for(var i = 0; i < gameObj.tag.length; i++){
+        if(gameObj.tag[i].$.k == tag)
+            return gameObj.tag[i].$.v;
+    }
+    return false;
+}
+
+function resetKeys(){
+    for( i = 0; i < Keys.length; i++ )
+    Keys[i] = false;
+}
+
 $(window).blur(function(e) {
-  for( i = 0; i < Keys.length; i++ ) {
-        Keys[i] = false;
-  }
+    resetKeys();
 });
 
 window.addEventListener("keydown",
