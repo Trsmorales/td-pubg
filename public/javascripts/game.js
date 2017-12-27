@@ -218,6 +218,9 @@ function moveOpponents(sharedData, myId){
             opponents[id].shape.x = player.getRelativeX(sharedData[i].x);
             opponents[id].shape.y = player.getRelativeY(sharedData[i].y);
         } else { //New opponent
+            //hold on a second we have a connection without a player yet skip this update.
+            if(!sharedData[i].x || !sharedData[i].y || !sharedData[i].color) continue;
+
             opponents[id] = new GameObject();
             opponents[id].shape.graphics.beginFill(sharedData[i].color).drawCircle(0, 0, 10);
             opponents[id].shape.x = player.getRelativeX(sharedData[i].x);
@@ -350,14 +353,14 @@ class GameObject {
 
     getRelativeX(globalX){
         //If were more then a screen away dont draw
-        if(Math.abs(this.x -globalX) > GAMEBOUNDSX) return -100;
+        if(!globalX || Math.abs(this.x -globalX) > GAMEBOUNDSX) return -100;
         var diff = this.x - globalX;
         return this.shape.x - diff;
     }
     
     getRelativeY(globalY){
         //If were more then a screen away dont draw
-        if(Math.abs(this.y -globalY) > GAMEBOUNDSY) return -100;
+        if(!globalY || Math.abs(this.y -globalY) > GAMEBOUNDSY) return -100;
         var diff = this.y - globalY;
         return this.shape.y - diff;
     }
