@@ -12,7 +12,7 @@
     "express-flash": "0.0.2",
     "express-session": "^1.15.6",
     "geolib": "^2.0.24",
-    "morgan": "^1.9.0",
+    "morgan": "^1.9.1",
     "pug": "2.0.0-rc.4",
     "redis": "^2.8.0",
     "request": "^2.83.0",
